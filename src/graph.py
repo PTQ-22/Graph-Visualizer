@@ -44,11 +44,8 @@ class Edge:
 
     def draw(self, win: pygame.Surface):
         if self.start and self.end:
-            # pygame.draw.line(win, self.color, self.start.get_pos(), self.end.get_pos(), self.SIZE)
-
-            # pygame.draw.polygon(win, self.color, [p], self.SIZE)
-            p1 = self.start.get_pos()
-            p2 = self.end.get_pos()
+            p1 = self.end.get_pos()
+            p2 = self.start.get_pos()
             pygame.draw.line(win, self.color, p1, p2, self.SIZE)
             if self.directing:
                 dist = 50
@@ -101,11 +98,21 @@ class Graph:
         self.adj_list_directed = defaultdict(list)
         self.current_adj_list = self.adj_list_undirected
         self.vertex_dict: defaultdict[int, Vertex] = defaultdict()
-        self.edge_arr: List[Edge] = [Edge()]
+        self.edge_arr: List[Edge] = []
+
+        self.adding_edge = False
+        self.adding_edge_first_v = None
+        self.directing = False
 
     def draw(self, win: pygame.Surface):
         for e in self.edge_arr:
             e.draw(win)
+        if self.adding_edge:
+            pos = pygame.mouse.get_pos()
+            if self.adding_edge_first_v:
+                pygame.draw.line(win, Colors.BLACK, pos, self.adding_edge_first_v.get_pos(), Edge.SIZE)
+            else:
+                pygame.draw.line(win, Colors.BLACK, pos, (pos[0]+10, pos[1]+5), Edge.SIZE)
         for v in self.vertex_dict.values():
             v.draw(win)
 
@@ -114,18 +121,41 @@ class Graph:
             if v.is_clicked:
                 v.rect.center = pygame.mouse.get_pos()
 
-    def change_directing(self):
+    def change_directing(self, d: bool):
         if self.current_adj_list is self.adj_list_directed:
             self.current_adj_list = self.adj_list_undirected
         else:
             self.current_adj_list = self.adj_list_directed
         for e in self.edge_arr:
-            e.directing = not e.directing
+            e.directing = d
+        self.directing = d
 
     def check_clicked_vertex(self, mouse_pos: Tuple[int, int]):
         for v in self.vertex_dict.values():
             if v.rect.collidepoint(mouse_pos):
                 v.is_clicked = not v.is_clicked
+
+    def check_clicked_vertex_while_adding_edge(self, mouse_pos: Tuple[int, int]) -> bool:
+        for v in self.vertex_dict.values():
+            if v.rect.collidepoint(mouse_pos):
+                if not self.adding_edge_first_v:
+                    self.adding_edge_first_v = v
+                    return False
+                else:
+                    a, b = self.adding_edge_first_v.number, v.number
+                    self.adj_list_undirected[a].append(b)
+                    self.adj_list_undirected[b].append(a)
+                    self.adj_list_directed[a].append(b)
+
+                    if self.adding_edge_first_v.number == v.number:
+                        self.edge_arr.append(Loop(v))
+                    else:
+                        self.add_edge(self.adding_edge_first_v, v)
+                    if self.directing:
+                        self.edge_arr[len(self.edge_arr) - 1].directing = True
+                    self.adding_edge_first_v = None
+                    return True
+        return False
 
     def add_vertex(self, num: int, pos: Tuple[int, int]):
         self.vertex_dict[num] = Vertex(num, pos)
@@ -135,22 +165,31 @@ class Graph:
 
     def load_graph_from_file(self, file_path: str):
         self.__init__()
-        with open(file_path, 'r') as file:
-            try:
-                n, m = file.readline().split()
-                for i in range(int(m)):
-                    a, b = file.readline().split()
-                    a, b = int(a), int(b)
+        try:
+            with open(file_path, 'r') as file:
+                try:
+                    n, m = file.readline().split()
+                    for i in range(int(n)):
+                        self.adj_list_undirected[i+1] = []
+                        self.adj_list_directed[i+1] = []
+                    for i in range(int(m)):
+                        a, b = file.readline().split()
+                        a, b = int(a), int(b)
 
-                    self.adj_list_undirected[a].append(b)
-                    self.adj_list_undirected[b].append(a)
+                        self.adj_list_undirected[a].append(b)
+                        self.adj_list_undirected[b].append(a)
 
-                    self.adj_list_directed[a].append(b)
+                        self.adj_list_directed[a].append(b)
 
-            except ValueError:
-                print("Invalid file format")
-                return
-
+                except ValueError:
+                    print("Invalid file format")
+                    return
+        except FileNotFoundError:
+            print("No file selected")
+            return
+        except TypeError:
+            print("No file selected")
+            return
         self.make_vertex_arr_from_adj_list()
         self.make_edge_arr_from_adj_list()
 
