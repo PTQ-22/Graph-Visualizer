@@ -1,6 +1,8 @@
 from typing import Tuple
 import pygame
 
+pygame.init()
+
 
 class Button:
 
