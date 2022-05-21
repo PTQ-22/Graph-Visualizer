@@ -8,9 +8,9 @@ class Button:
 
     def __init__(self, text: str, font_size: int, rect: Tuple[int, int, int, int],
                  color: Tuple[int, int, int], hover_color: Tuple[int, int, int]):
-        font = pygame.font.Font("freesansbold.ttf", font_size)
+        self.font = pygame.font.Font("freesansbold.ttf", font_size)
         self.text = text
-        self.text_obj = font.render(text, False, (0, 0, 0))
+        self.text_obj = self.font.render(text, False, (0, 0, 0))
         self.text_rect = self.text_obj.get_rect(center=(rect[0] + rect[2] // 2, rect[1] + rect[3] // 2))
         self.rect = pygame.Rect(rect)
         self.color = color
@@ -31,3 +31,9 @@ class Button:
             return False
         self.current_color = self.color
         return False
+
+    def change_text(self, new_text: str):
+        self.text = new_text
+        self.text_obj = self.font.render(new_text, False, (0, 0, 0))
+        self.text_rect = self.text_obj.get_rect(center=
+                                                (self.rect[0] + self.rect[2] // 2, self.rect[1] + self.rect[3] // 2))

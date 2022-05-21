@@ -9,3 +9,5 @@ class Colors:
     GREEN = (0, 200, 0)
     DARK_GREEN = (0, 150, 0)
     BLACK = (0, 0, 0)
+    RED = (200, 0, 0)
+    DARK_RED = (150, 0, 0)
