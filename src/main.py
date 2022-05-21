@@ -51,6 +51,17 @@ def main():
                         clicked_button.change_text("UNDIRECTED")
                         clicked_button.color = Colors.RED
                         clicked_button.hover_color = Colors.DARK_RED
+                if clicked_button.text.endswith("WEIGHTED"):
+                    if clicked_button.color == Colors.RED:
+                        graph.change_weighted(True)
+                        clicked_button.change_text("WEIGHTED")
+                        clicked_button.color = Colors.GREEN
+                        clicked_button.hover_color = Colors.DARK_GREEN
+                    elif clicked_button.color == Colors.GREEN:
+                        graph.change_weighted(False)
+                        clicked_button.change_text("UNWEIGHTED")
+                        clicked_button.color = Colors.RED
+                        clicked_button.hover_color = Colors.DARK_RED
                 if clicked_button.text == "ADD NODE":
                     pos = pygame.mouse.get_pos()
                     if len(graph.vertex_dict) > 0:

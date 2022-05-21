@@ -36,17 +36,24 @@ class Edge:
 
     SIZE = 5
 
-    def __init__(self, a: Vertex = None, b: Vertex = None):
+    def __init__(self, a: Vertex = None, b: Vertex = None, weight: int = 1):
+        self.weight = weight
         self.color = Colors.BLACK
         self.directing = False
+        self.weighted = False
         self.start = a
         self.end = b
+        font = pygame.font.Font('freesansbold.ttf', 25)
+        self.text = font.render(str(self.weight), True, Colors.BLACK)
 
     def draw(self, win: pygame.Surface):
         if self.start and self.end:
             p1 = self.end.get_pos()
             p2 = self.start.get_pos()
             pygame.draw.line(win, self.color, p1, p2, self.SIZE)
+            if self.weighted:
+                center = ((p1[0] + p2[0]) // 2 - 5, (p1[1] + p2[1]) // 2 - 15)
+                win.blit(self.text, self.text.get_rect(center=center))
             if self.directing:
                 dist = 50
 
@@ -81,12 +88,15 @@ class Edge:
 
 class Loop(Edge):
 
-    def __init__(self, a: Vertex):
-        super().__init__(a, a)
+    def __init__(self, a: Vertex, weight: int = 1):
+        super().__init__(a, a, weight)
 
     def draw(self, win: pygame.Surface):
         p = self.start.get_pos()
         pygame.draw.circle(win, self.color, (p[0] + Vertex.RADIUS - 5, p[1] - Vertex.RADIUS + 5), 20, self.SIZE)
+        if self.weighted:
+            center = (p[0] + Vertex.RADIUS - 5, p[1] - Vertex.RADIUS - 25)
+            win.blit(self.text, self.text.get_rect(center=center))
         if self.directing:
             self.draw_arrow(win, p[0] + Vertex.RADIUS + 10, p[1] - 15, self.color, 40)
 
@@ -103,6 +113,7 @@ class Graph:
         self.adding_edge = False
         self.adding_edge_first_v = None
         self.directing = False
+        self.weighted = False
 
     def draw(self, win: pygame.Surface):
         for e in self.edge_arr:
@@ -130,6 +141,11 @@ class Graph:
             e.directing = d
         self.directing = d
 
+    def change_weighted(self, w: bool):
+        for e in self.edge_arr:
+            e.weighted = w
+        self.weighted = w
+
     def check_clicked_vertex(self, mouse_pos: Tuple[int, int]):
         for v in self.vertex_dict.values():
             if v.rect.collidepoint(mouse_pos):
@@ -150,9 +166,11 @@ class Graph:
                     if self.adding_edge_first_v.number == v.number:
                         self.edge_arr.append(Loop(v))
                     else:
-                        self.add_edge(self.adding_edge_first_v, v)
+                        self.add_edge(self.adding_edge_first_v, v, 1)
                     if self.directing:
                         self.edge_arr[len(self.edge_arr) - 1].directing = True
+                    if self.weighted:
+                        self.edge_arr[len(self.edge_arr) - 1].weighted = True
                     self.adding_edge_first_v = None
                     return True
         return False
@@ -160,11 +178,12 @@ class Graph:
     def add_vertex(self, num: int, pos: Tuple[int, int]):
         self.vertex_dict[num] = Vertex(num, pos)
 
-    def add_edge(self, a: Vertex, b: Vertex):
-        self.edge_arr.append(Edge(a, b))
+    def add_edge(self, a: Vertex, b: Vertex, w: int):
+        self.edge_arr.append(Edge(a, b, w))
 
     def load_graph_from_file(self, file_path: str):
         self.__init__()
+        weights = defaultdict()
         try:
             with open(file_path, 'r') as file:
                 try:
@@ -173,7 +192,13 @@ class Graph:
                         self.adj_list_undirected[i+1] = []
                         self.adj_list_directed[i+1] = []
                     for i in range(int(m)):
-                        a, b = file.readline().split()
+                        values = file.readline().split()
+                        if len(values) == 3:
+                            a, b, c = values
+                            weights[f'{a}-{b}'] = c
+                        else:
+                            a, b = values
+                            weights[f'{a}-{b}'] = 1
                         a, b = int(a), int(b)
 
                         self.adj_list_undirected[a].append(b)
@@ -181,7 +206,8 @@ class Graph:
 
                         self.adj_list_directed[a].append(b)
 
-                except ValueError:
+                except ValueError as e:
+                    print(e)
                     print("Invalid file format")
                     return
         except FileNotFoundError:
@@ -191,7 +217,7 @@ class Graph:
             print("No file selected")
             return
         self.make_vertex_arr_from_adj_list()
-        self.make_edge_arr_from_adj_list()
+        self.make_edge_arr_from_adj_list(weights)
 
     def make_vertex_arr_from_adj_list(self):
         for v in self.adj_list_directed.keys():
@@ -210,11 +236,11 @@ class Graph:
 
             self.add_vertex(v, (x, y))
 
-    def make_edge_arr_from_adj_list(self):
+    def make_edge_arr_from_adj_list(self, weights: defaultdict):
         for v1, v_list in self.adj_list_directed.items():
             for v2 in v_list:
                 if v1 == v2:
-                    self.edge_arr.append(Loop(self.vertex_dict[v1]))
+                    self.edge_arr.append(Loop(self.vertex_dict[v1], weights[f'{v1}-{v2}']))
                 else:
-                    self.add_edge(self.vertex_dict[v1], self.vertex_dict[v2])
+                    self.add_edge(self.vertex_dict[v1], self.vertex_dict[v2], weights[f'{v1}-{v2}'])
 
