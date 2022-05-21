@@ -12,7 +12,10 @@ class ButtonsBar:
         self.color = Colors.DARK_GREY
         self.rect = pygame.Rect(0, 0, WIDTH, HEIGHT // 5)
         self.buttons = [
-            Button("LOAD GRAPH", 15, (20, 5, 280, 40), Colors.GREEN, Colors.DARK_GREEN),
+            Button("LOAD GRAPH", 15, (10, 5, 150, 40), Colors.GREEN, Colors.DARK_GREEN),
+            Button("SCALE", 15, (170, 5, 70, 40), Colors.BLUE, Colors.BLUE),
+            Button("+", 30, (240, 5, 40, 40), Colors.BLUE, Colors.DARK_BLUE),
+            Button("-", 30, (280, 5, 40, 40), Colors.BLUE, Colors.DARK_BLUE),
             Button("UNDIRECTED", 15, (10, 55, 150, 40), Colors.RED, Colors.DARK_RED),
             Button("ADD NODE", 15, (10, 105, 150, 40), Colors.BLUE, Colors.DARK_BLUE),
             Button("ADD EDGE", 15, (170, 105, 150, 40), Colors.BLUE, Colors.DARK_BLUE),

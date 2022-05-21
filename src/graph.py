@@ -13,19 +13,25 @@ class Vertex:
 
     def __init__(self, number: int, pos: Tuple[int, int]):
         self.number = number
-        self.rect = pygame.Rect(pos[0] - self.RADIUS, pos[1] - self.RADIUS, 2*self.RADIUS, 2*self.RADIUS)
+        self.rect = pygame.Rect(pos[0] - self.RADIUS * Graph.scale, pos[1] - self.RADIUS * Graph.scale,
+                                2*self.RADIUS * Graph.scale, 2*self.RADIUS * Graph.scale)
         self.color = Colors.GREY
         self.border_color = Colors.BLACK
-        font = pygame.font.Font('freesansbold.ttf', 40)
+        font = pygame.font.Font('freesansbold.ttf', int(40 * Graph.scale))
         self.text = font.render(str(self.number), True, Colors.BLACK)
         self.is_clicked = False
 
     def draw(self, win: pygame.Surface):
-        pygame.draw.circle(win, self.color, self.rect.center, self.RADIUS)
+        self.rect.update(self.rect[0], self.rect[1], 2*self.RADIUS * Graph.scale, 2*self.RADIUS * Graph.scale)
+        pygame.draw.circle(win, self.color, self.rect.center, self.RADIUS * Graph.scale)
         if self.is_clicked:
-            pygame.draw.circle(win, Colors.GREEN, self.rect.center, self.RADIUS, self.LINE_SIZE)
+            pygame.draw.circle(win, Colors.GREEN, self.rect.center, self.RADIUS * Graph.scale,
+                               int(self.LINE_SIZE * Graph.scale))
         else:
-            pygame.draw.circle(win, self.border_color, self.rect.center, self.RADIUS, self.LINE_SIZE)
+            pygame.draw.circle(win, self.border_color, self.rect.center, self.RADIUS * Graph.scale,
+                               int(self.LINE_SIZE * Graph.scale))
+        font = pygame.font.Font('freesansbold.ttf', int(40 * Graph.scale))
+        self.text = font.render(str(self.number), True, Colors.BLACK)
         win.blit(self.text, self.text.get_rect(center=self.rect.center))
 
     def get_pos(self):
@@ -43,19 +49,21 @@ class Edge:
         self.weighted = False
         self.start = a
         self.end = b
-        font = pygame.font.Font('freesansbold.ttf', 25)
+        font = pygame.font.Font('freesansbold.ttf', int(25 * Graph.scale))
         self.text = font.render(str(self.weight), True, Colors.BLACK)
 
     def draw(self, win: pygame.Surface):
         if self.start and self.end:
             p1 = self.end.get_pos()
             p2 = self.start.get_pos()
-            pygame.draw.line(win, self.color, p1, p2, self.SIZE)
+            pygame.draw.line(win, self.color, p1, p2, int(self.SIZE * Graph.scale))
             if self.weighted:
-                center = ((p1[0] + p2[0]) // 2 - 5, (p1[1] + p2[1]) // 2 - 15)
+                center = ((p1[0] + p2[0]) // 2 - int(5 * Graph.scale), (p1[1] + p2[1]) // 2 - int(15 * Graph.scale))
+                font = pygame.font.Font('freesansbold.ttf', int(25 * Graph.scale))
+                self.text = font.render(str(self.weight), True, Colors.BLACK)
                 win.blit(self.text, self.text.get_rect(center=center))
             if self.directing:
-                dist = 50
+                dist = int(50 * Graph.scale)
 
                 dx = p2[0] - p1[0]
                 dy = p2[1] - p1[1]
@@ -78,12 +86,12 @@ class Edge:
                    (sin_theta * (pos[0] - cen[0]) + cos_theta * (pos[1] - cen[1])) + cen[1])
             return ret
 
-        p0 = rotate((0 + x, -10 + y), angle)
-        p1 = rotate((0 + x, 10 + y), angle)
-        p2 = rotate((-20 + x, 0 + y), angle)
+        p0 = rotate((0 + x, int(-10*Graph.scale) + y), angle)
+        p1 = rotate((0 + x, int(10*Graph.scale) + y), angle)
+        p2 = rotate((int(-20 * Graph.scale) + x, 0 + y), angle)
 
-        pygame.draw.line(win, color, p0, p2, self.SIZE)
-        pygame.draw.line(win, color, p1, p2, self.SIZE)
+        pygame.draw.line(win, color, p0, p2, int(self.SIZE * Graph.scale))
+        pygame.draw.line(win, color, p1, p2, int(self.SIZE * Graph.scale))
 
 
 class Loop(Edge):
@@ -93,15 +101,20 @@ class Loop(Edge):
 
     def draw(self, win: pygame.Surface):
         p = self.start.get_pos()
-        pygame.draw.circle(win, self.color, (p[0] + Vertex.RADIUS - 5, p[1] - Vertex.RADIUS + 5), 20, self.SIZE)
+        pygame.draw.circle(win, self.color, (p[0] + int((Vertex.RADIUS + 5) * Graph.scale),
+                                             p[1] - int((Vertex.RADIUS - 5) * Graph.scale)), int(20 * Graph.scale),
+                           int(self.SIZE * Graph.scale))
         if self.weighted:
-            center = (p[0] + Vertex.RADIUS - 5, p[1] - Vertex.RADIUS - 25)
+            center = (p[0] + int((Vertex.RADIUS - 5) * Graph.scale), p[1] - int((Vertex.RADIUS - 25) * Graph.scale))
             win.blit(self.text, self.text.get_rect(center=center))
         if self.directing:
-            self.draw_arrow(win, p[0] + Vertex.RADIUS + 10, p[1] - 15, self.color, 40)
+            self.draw_arrow(win, p[0] + int((Vertex.RADIUS + 10) * Graph.scale), p[1] - int(15 * Graph.scale),
+                            self.color, 40)
 
 
 class Graph:
+
+    scale = 1
 
     def __init__(self):
         self.adj_list_undirected = defaultdict(list)
@@ -121,9 +134,10 @@ class Graph:
         if self.adding_edge:
             pos = pygame.mouse.get_pos()
             if self.adding_edge_first_v:
-                pygame.draw.line(win, Colors.BLACK, pos, self.adding_edge_first_v.get_pos(), Edge.SIZE)
+                pygame.draw.line(win, Colors.BLACK, pos, self.adding_edge_first_v.get_pos(),
+                                 int(Edge.SIZE * Graph.scale))
             else:
-                pygame.draw.line(win, Colors.BLACK, pos, (pos[0]+10, pos[1]+5), Edge.SIZE)
+                pygame.draw.line(win, Colors.BLACK, pos, (pos[0]+10, pos[1]+5), int(Edge.SIZE * Graph.scale))
         for v in self.vertex_dict.values():
             v.draw(win)
 
@@ -226,9 +240,11 @@ class Graph:
             x, y = 0, 0
             while loop and attempts < 100:
                 loop = False
-                x = random.randint(Vertex.RADIUS, WIDTH - Vertex.RADIUS)
-                y = random.randint(HEIGHT // 6 + Vertex.RADIUS, HEIGHT - Vertex.RADIUS)
-                test_rect = pygame.Rect(x - Vertex.RADIUS, y - Vertex.RADIUS, 2*Vertex.RADIUS, 2*Vertex.RADIUS)
+                x = random.randint(int(Vertex.RADIUS * Graph.scale), WIDTH - int(Vertex.RADIUS * Graph.scale))
+                y = random.randint(HEIGHT // 6 + int(Vertex.RADIUS * Graph.scale),
+                                   HEIGHT - int(Vertex.RADIUS * Graph.scale))
+                test_rect = pygame.Rect(x - int(Vertex.RADIUS * Graph.scale), y - int(Vertex.RADIUS * Graph.scale),
+                                        2*int(Vertex.RADIUS * Graph.scale), 2*int(Vertex.RADIUS * Graph.scale))
                 for vertex in self.vertex_dict.values():
                     if test_rect.colliderect(vertex.rect):
                         loop = True

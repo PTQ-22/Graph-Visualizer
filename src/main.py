@@ -40,6 +40,10 @@ def main():
                 if clicked_button.text == "LOAD GRAPH":
                     file_path = buttons_bar.choose_file_dialog()
                     graph.load_graph_from_file(file_path)
+                if clicked_button.text == '+' and Graph.scale < 1.3:
+                    Graph.scale += 0.1
+                if clicked_button.text == '-' and Graph.scale > 0.3:
+                    Graph.scale -= 0.1
                 if clicked_button.text.endswith("DIRECTED"):
                     if clicked_button.color == Colors.RED:
                         graph.change_directing(True)

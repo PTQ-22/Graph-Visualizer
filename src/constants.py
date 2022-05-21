@@ -11,5 +11,5 @@ class Colors:
     BLACK = (0, 0, 0)
     RED = (200, 0, 0)
     DARK_RED = (150, 0, 0)
-    BLUE = (0, 0, 200)
+    BLUE = (0, 0, 240)
     DARK_BLUE = (0, 0, 150)
