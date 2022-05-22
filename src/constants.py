@@ -4,6 +4,7 @@ FPS = 60
 
 
 class Colors:
+    LIGHT_GREY = (200, 200, 200)
     GREY = (150, 150, 150)
     DARK_GREY = (110, 110, 110)
     GREEN = (0, 200, 0)

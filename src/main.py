@@ -21,6 +21,7 @@ def main():
         graph.draw(win)
 
         graph.update()
+        buttons_bar.update_algo_buttons_state(graph)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

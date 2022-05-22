@@ -1,6 +1,8 @@
 from typing import Tuple
 import pygame
 
+from src.constants import Colors
+
 pygame.init()
 
 
@@ -16,9 +18,13 @@ class Button:
         self.color = color
         self.hover_color = hover_color
         self.current_color = color
+        self.active = True
 
     def draw(self, win: pygame.Surface):
-        pygame.draw.rect(win, self.current_color, self.rect)
+        if self.active:
+            pygame.draw.rect(win, self.current_color, self.rect)
+        else:
+            pygame.draw.rect(win, Colors.LIGHT_GREY, self.rect)
         win.blit(self.text_obj, self.text_rect)
         self.is_mouse(None)
 
