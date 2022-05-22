@@ -1,10 +1,11 @@
 import random
+from queue import PriorityQueue
 from collections import defaultdict, deque
 from typing import List
 
 import pygame
 
-from src.constants import Colors
+from src.constants import Colors, INFINITY
 from src.graph import Graph, Edge
 
 
@@ -46,9 +47,7 @@ class DfsVis(AlgoController):
                 self.graph.vertex_dict[v].color = Colors.YELLOW
             elif order == 'out':
                 self.graph.vertex_dict[v].color = Colors.GREEN
-            self.graph.draw(win)
-            pygame.display.update()
-            pygame.time.wait(400)
+            self.redraw_window(win)
         self.clear_after_vis()
 
     def dfs(self, v: int):
@@ -67,7 +66,6 @@ class BfsVis(AlgoController):
         self.dist = defaultdict()
 
     def draw_bfs_vis(self, win: pygame.Surface):
-        print(self.graph.current_adj_list)
         for v in self.graph.current_adj_list.keys():
             self.visited[v] = False
             self.dist[v] = -1
@@ -214,18 +212,101 @@ class DijkstraVis(AlgoController):
 
     def __init__(self, graph: Graph):
         super().__init__(graph)
+        self.dist = defaultdict()
+        self.weighted_graph = defaultdict(list)
 
     def draw_dijkstra_vis(self, win: pygame.Surface):
-        pass
+        for v in self.graph.current_adj_list.keys():
+            self.visited[v] = False
+            self.dist[v] = INFINITY
+        self.make_weighted_graph_rep()
+
+        self.dijkstra(1)
+
+        for v in self.vis_queue:
+            self.graph.vertex_dict[v].color = Colors.YELLOW
+            self.redraw_window(win)
+        self.clear_after_vis()
+
+    def dijkstra(self, start: int):
+        pq = PriorityQueue()
+        pq.put((0, start))
+        self.dist[start] = 0
+
+        while not pq.empty():
+            v = pq.get()[1]
+            if self.visited[v]:
+                continue
+            self.visited[v] = True
+            self.vis_queue.append(v)
+            for p in self.weighted_graph[v]:
+                u, w = p
+                if self.dist[v] + w < self.dist[u]:
+                    self.dist[u] = self.dist[v] + w
+                    pq.put((-w, u))
+
+    def make_weighted_graph_rep(self):
+        for e in self.graph.edge_arr:
+            a = int(e.start.number)
+            b = int(e.end.number)
+            w = int(e.weight)
+            if self.graph.directing:
+                self.weighted_graph[a].append((b, w))
+            else:
+                self.weighted_graph[a].append((b, w))
+                self.weighted_graph[b].append((a, w))
 
 
 class BridesAndArticPointsVis(AlgoController):
 
     def __init__(self, graph: Graph):
         super().__init__(graph)
+        self.pre = defaultdict()
+        self.low = defaultdict()
+        self.is_art_point = defaultdict()
+        for v in self.graph.current_adj_list.keys():
+            self.pre[v] = 0
+            self.low[v] = 0
+            self.is_art_point[v] = False
+        self.pre_counter = 0
 
     def draw_bridges_vis(self, win: pygame.Surface):
-        pass
+        self.dfs(1, -1)
+
+        for e in self.graph.edge_arr:
+            a = e.start.number
+            b = e.end.number
+            if self.pre[a] > self.pre[b]:
+                a, b = b, a
+            if self.low[b] > self.pre[a]:
+                e.color = Colors.RED
+        self.redraw_window(win)
+        self.clear_after_vis(3000)
 
     def draw_artic_points_vis(self, win: pygame.Surface):
-        pass
+        self.dfs(1, -1)
+
+        for v in self.graph.vertex_dict.values():
+            if self.is_art_point[v.number]:
+                v.color = Colors.RED
+
+        self.redraw_window(win)
+        self.clear_after_vis(3000)
+
+    def dfs(self, v: int, pred: int):
+        if self.low[v] != 0:
+            return self.pre[v]
+        self.pre_counter += 1
+        self.pre[v] = self.low[v] = self.pre_counter
+        c = 0
+        for u in self.graph.adj_list_undirected[v]:
+            if u != pred:
+                c += 1
+                self.low[v] = min(self.low[v], self.dfs(u, v))
+                if pred != -1 and self.low[u] >= self.pre[v]:
+                    self.is_art_point[v] = True
+
+        if pred == -1 and c > 1:
+            self.is_art_point[v] = True
+
+        return self.low[v]

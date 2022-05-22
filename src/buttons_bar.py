@@ -45,7 +45,7 @@ class ButtonsBar:
 
     def get_clicked_button(self, event: pygame.event) -> Button:
         for button in self.buttons:
-            if button.is_mouse(event):
+            if button.is_mouse(event) and button.active:
                 return button
 
     def update_algo_buttons_state(self, graph: Graph):
@@ -54,11 +54,11 @@ class ButtonsBar:
         :param graph: graph object
         """
         for button in self.buttons:
-            if button.text == "BRIDGES" or button.text == "ARTIC. POINTS":
-                if not graph.directing:
-                    button.active = True
-                else:
-                    button.active = False
+            # if button.text == "BRIDGES" or button.text == "ARTIC. POINTS":
+            #     if not graph.directing:
+            #         button.active = True
+            #     else:
+            #         button.active = False
             if button.text == "DIJKSTRA":
                 if graph.weighted:
                     button.active = True

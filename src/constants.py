@@ -1,6 +1,7 @@
 WIDTH = 1000
 HEIGHT = 750
 FPS = 60
+INFINITY = 1_000_000_000
 
 
 class Colors:

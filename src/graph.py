@@ -184,6 +184,8 @@ class Graph:
                     self.adj_list_directed[a].append(b)
                     if b not in self.adj_list_directed.keys():
                         self.adj_list_directed[b] = []
+                    if b not in self.adj_list_undirected.keys():
+                        self.adj_list_undirected[b] = []
 
                     if self.adding_edge_first_v.number == v.number:
                         self.edge_arr.append(Loop(v))
