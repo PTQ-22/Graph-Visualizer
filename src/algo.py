@@ -1,10 +1,11 @@
 import random
 from collections import defaultdict, deque
+from typing import List
 
 import pygame
 
 from src.constants import Colors
-from src.graph import Graph
+from src.graph import Graph, Edge
 
 
 class AlgoController:
@@ -18,6 +19,9 @@ class AlgoController:
         pygame.time.wait(time)
         for v in self.graph.vertex_dict.values():
             v.color = Colors.GREY
+            v.border_color = Colors.BLACK
+        for e in self.graph.edge_arr:
+            e.color = Colors.BLACK
 
     def redraw_window(self, win: pygame.Surface):
         self.graph.draw(win)
@@ -155,8 +159,73 @@ class SCCvis(AlgoController):
 
 class MSTvis(AlgoController):
 
+    class DSU:
+        def __init__(self, nodes: List[int]):
+            self.rep = defaultdict()
+            self.set_size = defaultdict()
+            for v in nodes:
+                self.rep[v] = v
+                self.set_size[v] = 1
+
+        def find(self, a: int):
+            if self.rep[a] == a:
+                return a
+            self.rep[a] = self.find(self.rep[a])
+            return self.rep[a]
+
+        def join(self, a: int, b: int):
+            a = self.find(a)
+            b = self.find(b)
+            if a == b:
+                return
+            if self.set_size[a] > self.set_size[b]:
+                a, b = b, a
+            self.set_size[b] += self.set_size[a]
+            self.rep[a] = b
+
+    def __init__(self, graph: Graph):
+        super().__init__(graph)
+        self.dsu = self.DSU(graph.current_adj_list.keys())
+        self.edges: List[Edge] = []
+        self.mst: List[Edge] = []
+
+    def draw_mst_vis(self, win: pygame.Surface):
+        self.find_mst()
+        for e in self.mst:
+            e.color = Colors.CYAN
+        for v in self.graph.vertex_dict.values():
+            v.border_color = Colors.CYAN
+
+        self.redraw_window(win)
+        self.clear_after_vis(3000)
+
+    def find_mst(self):
+        for e in self.graph.edge_arr:
+            self.edges.append(e)
+        self.edges.sort(key=lambda edge: int(edge.weight))
+
+        for e in self.edges:
+            if self.dsu.find(e.start.number) != self.dsu.find(e.end.number):
+                self.dsu.join(e.start.number, e.end.number)
+                self.mst.append(e)
+
+
+class DijkstraVis(AlgoController):
+
     def __init__(self, graph: Graph):
         super().__init__(graph)
 
-    def draw_mst_vis(self, win: pygame.Surface):
+    def draw_dijkstra_vis(self, win: pygame.Surface):
+        pass
+
+
+class BridesAndArticPointsVis(AlgoController):
+
+    def __init__(self, graph: Graph):
+        super().__init__(graph)
+
+    def draw_bridges_vis(self, win: pygame.Surface):
+        pass
+
+    def draw_artic_points_vis(self, win: pygame.Surface):
         pass

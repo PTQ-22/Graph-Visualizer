@@ -1,7 +1,7 @@
 import sys
 import pygame
 
-from .algo import AlgoController, DfsVis, BfsVis, SCCvis, MSTvis
+from .algo import DfsVis, BfsVis, SCCvis, MSTvis, BridesAndArticPointsVis, DijkstraVis
 from .constants import *
 from .buttons_bar import ButtonsBar
 from .graph import Graph
@@ -98,4 +98,14 @@ def main():
                     if clicked_button.text == "MST":
                         mst = MSTvis(graph)
                         mst.draw_mst_vis(win)
+                    if clicked_button.text == "BRIDGES":
+                        bridges = BridesAndArticPointsVis(graph)
+                        bridges.draw_bridges_vis(win)
+                    if clicked_button.text == "ARTIC. POINTS":
+                        artic_points = BridesAndArticPointsVis(graph)
+                        artic_points.draw_artic_points_vis(win)
+                    if clicked_button.text == "DIJKSTRA":
+                        dijkstra = DijkstraVis(graph)
+                        dijkstra.draw_dijkstra_vis(win)
+
         pygame.display.update()

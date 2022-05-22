@@ -15,3 +15,4 @@ class Colors:
     BLUE = (0, 0, 240)
     DARK_BLUE = (0, 0, 150)
     YELLOW = (200, 200, 50)
+    CYAN = (0, 255, 255)
