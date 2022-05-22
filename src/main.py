@@ -1,5 +1,7 @@
 import sys
 import pygame
+
+from .algo import AlgoController, DfsVis, BfsVis, SCCvis, MSTvis
 from .constants import *
 from .buttons_bar import ButtonsBar
 from .graph import Graph
@@ -36,15 +38,19 @@ def main():
                 else:
                     graph.check_clicked_vertex(pos)
 
+            # handle button events
             clicked_button = buttons_bar.get_clicked_button(event)
             if clicked_button:
                 if clicked_button.text == "LOAD GRAPH":
                     file_path = buttons_bar.choose_file_dialog()
                     graph.load_graph_from_file(file_path)
+                # scaling
                 if clicked_button.text == '+' and Graph.scale < 1.3:
                     Graph.scale += 0.1
                 if clicked_button.text == '-' and Graph.scale > 0.3:
                     Graph.scale -= 0.1
+
+                # change graph state
                 if clicked_button.text.endswith("DIRECTED"):
                     if clicked_button.color == Colors.RED:
                         graph.change_directing(True)
@@ -67,6 +73,7 @@ def main():
                         clicked_button.change_text("UNWEIGHTED")
                         clicked_button.color = Colors.RED
                         clicked_button.hover_color = Colors.DARK_RED
+
                 if clicked_button.text == "ADD NODE":
                     pos = pygame.mouse.get_pos()
                     if len(graph.vertex_dict) > 0:
@@ -78,4 +85,17 @@ def main():
                 if clicked_button.text == "ADD EDGE":
                     graph.adding_edge = True
 
+                if len(graph.vertex_dict) > 0:
+                    if clicked_button.text == "DFS":
+                        dfs = DfsVis(graph)
+                        dfs.draw_dfs_vis(win)
+                    if clicked_button.text == "BFS":
+                        bfs = BfsVis(graph)
+                        bfs.draw_bfs_vis(win)
+                    if clicked_button.text == "SCC":
+                        scc = SCCvis(graph)
+                        scc.draw_scc_vis(win)
+                    if clicked_button.text == "MST":
+                        mst = MSTvis(graph)
+                        mst.draw_mst_vis(win)
         pygame.display.update()

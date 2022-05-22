@@ -26,7 +26,7 @@ class Button:
         else:
             pygame.draw.rect(win, Colors.LIGHT_GREY, self.rect)
         win.blit(self.text_obj, self.text_rect)
-        self.is_mouse(None)
+        self.is_mouse(None)  # to update hover
 
     def is_mouse(self, event: pygame.event) -> bool:
         pos = pygame.mouse.get_pos()

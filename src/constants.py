@@ -14,3 +14,4 @@ class Colors:
     DARK_RED = (150, 0, 0)
     BLUE = (0, 0, 240)
     DARK_BLUE = (0, 0, 150)
+    YELLOW = (200, 200, 50)

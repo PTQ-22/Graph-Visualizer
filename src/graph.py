@@ -105,7 +105,7 @@ class Loop(Edge):
                                              p[1] - int((Vertex.RADIUS - 5) * Graph.scale)), int(20 * Graph.scale),
                            int(self.SIZE * Graph.scale))
         if self.weighted:
-            center = (p[0] + int((Vertex.RADIUS - 5) * Graph.scale), p[1] - int((Vertex.RADIUS - 25) * Graph.scale))
+            center = (p[0] + int((Vertex.RADIUS + 5) * Graph.scale), p[1] - int((Vertex.RADIUS + 25) * Graph.scale))
             win.blit(self.text, self.text.get_rect(center=center))
         if self.directing:
             self.draw_arrow(win, p[0] + int((Vertex.RADIUS + 10) * Graph.scale), p[1] - int(15 * Graph.scale),
@@ -142,11 +142,17 @@ class Graph:
             v.draw(win)
 
     def update(self):
+        """
+        updates nodes position if they are moved by mouse
+        """
         for v in self.vertex_dict.values():
             if v.is_clicked:
                 v.rect.center = pygame.mouse.get_pos()
 
     def change_directing(self, d: bool):
+        """
+        update edges and current adjacency list
+        """
         if self.current_adj_list is self.adj_list_directed:
             self.current_adj_list = self.adj_list_undirected
         else:
@@ -176,6 +182,8 @@ class Graph:
                     self.adj_list_undirected[a].append(b)
                     self.adj_list_undirected[b].append(a)
                     self.adj_list_directed[a].append(b)
+                    if b not in self.adj_list_directed.keys():
+                        self.adj_list_directed[b] = []
 
                     if self.adding_edge_first_v.number == v.number:
                         self.edge_arr.append(Loop(v))
@@ -241,7 +249,7 @@ class Graph:
             while loop and attempts < 100:
                 loop = False
                 x = random.randint(int(Vertex.RADIUS * Graph.scale), WIDTH - int(Vertex.RADIUS * Graph.scale))
-                y = random.randint(HEIGHT // 6 + int(Vertex.RADIUS * Graph.scale),
+                y = random.randint(HEIGHT // 5 + int(Vertex.RADIUS * Graph.scale),
                                    HEIGHT - int(Vertex.RADIUS * Graph.scale))
                 test_rect = pygame.Rect(x - int(Vertex.RADIUS * Graph.scale), y - int(Vertex.RADIUS * Graph.scale),
                                         2*int(Vertex.RADIUS * Graph.scale), 2*int(Vertex.RADIUS * Graph.scale))

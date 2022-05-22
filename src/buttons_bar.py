@@ -8,6 +8,9 @@ from .graph import Graph
 
 
 class ButtonsBar:
+    """
+    controls all buttons on the top
+    """
 
     def __init__(self):
         self.color = Colors.DARK_GREY
@@ -46,6 +49,10 @@ class ButtonsBar:
                 return button
 
     def update_algo_buttons_state(self, graph: Graph):
+        """
+        changes buttons state if they are available or not
+        :param graph: graph object
+        """
         for button in self.buttons:
             if button.text == "BRIDGES" or button.text == "ARTIC. POINTS":
                 if not graph.directing:
@@ -68,9 +75,12 @@ class ButtonsBar:
                 else:
                     button.active = False
 
-
     @staticmethod
-    def choose_file_dialog():
+    def choose_file_dialog() -> str:
+        """
+        pops file window
+        :return: full choosen file path
+        """
         t = tkinter.Tk()
         t.withdraw()
         file_path = tkinter.filedialog.askopenfilename(parent=t)
