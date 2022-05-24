@@ -149,6 +149,21 @@ class Graph:
             if v.is_clicked:
                 v.rect.center = pygame.mouse.get_pos()
 
+    def hover_nodes_on_mouse(self, mouse_pos: Tuple[int, int]):
+        for v in self.vertex_dict.values():
+            if v.rect.collidepoint(mouse_pos) and v.color == Colors.GREY:
+                v.color = Colors.DARK_GREY
+            elif v.color == Colors.DARK_GREY:
+                v.color = Colors.GREY
+
+    def get_clicked_node_number(self, event: pygame.event, mouse_pos: Tuple[int, int],
+                                mouse_color: Tuple[int, int, int]) -> int:
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            for v in self.vertex_dict.values():
+                if v.rect.collidepoint(mouse_pos):
+                    v.color = mouse_color
+                    return v.number
+
     def change_directing(self, d: bool):
         """
         update edges and current adjacency list
@@ -204,6 +219,13 @@ class Graph:
 
     def add_edge(self, a: Vertex, b: Vertex, w: int):
         self.edge_arr.append(Edge(a, b, w))
+
+    def find_edge(self, a: int, b: int) -> Edge:
+        for e in self.edge_arr:
+            if e.start.number == a and e.end.number == b:
+                return e
+            if e.start.number == b and e.end.number == a:
+                return e
 
     def load_graph_from_file(self, file_path: str):
         self.__init__()

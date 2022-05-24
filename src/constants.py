@@ -17,3 +17,4 @@ class Colors:
     DARK_BLUE = (0, 0, 150)
     YELLOW = (200, 200, 50)
     CYAN = (0, 255, 255)
+    PINK = (255, 20, 150)

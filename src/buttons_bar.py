@@ -1,5 +1,7 @@
+import sys
 import tkinter
 import tkinter.filedialog
+from typing import Tuple
 
 import pygame
 from .constants import *
@@ -74,6 +76,33 @@ class ButtonsBar:
                     button.active = True
                 else:
                     button.active = False
+
+    def draw_node_choosing(self, win: pygame.Surface, clock: pygame.time.Clock, graph: Graph, text: str,
+                           mouse_color: Tuple[int, int, int]) -> int:
+        start_node = None
+
+        text_button = Button(text, 35, (320, 35, 350, 40), Colors.DARK_GREY, Colors.DARK_GREY)
+
+        while not start_node:
+            clock.tick(FPS)
+            win.fill(Colors.GREY)
+
+            pos = pygame.mouse.get_pos()
+            graph.hover_nodes_on_mouse(pos)
+
+            pygame.draw.rect(win, self.color, self.rect)
+            text_button.draw(win)
+            graph.draw(win)
+            pygame.draw.circle(win, mouse_color, pos, 10)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit(0)
+                start_node = graph.get_clicked_node_number(event, pos, mouse_color)
+            pygame.display.update()
+
+        return start_node
 
     @staticmethod
     def choose_file_dialog() -> str:

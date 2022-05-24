@@ -5,6 +5,7 @@ from typing import List
 
 import pygame
 
+from src.button import Button
 from src.constants import Colors, INFINITY
 from src.graph import Graph, Edge
 
@@ -25,6 +26,7 @@ class AlgoController:
             e.color = Colors.BLACK
 
     def redraw_window(self, win: pygame.Surface):
+        win.fill(Colors.GREY)
         self.graph.draw(win)
         pygame.display.update()
         pygame.time.wait(400)
@@ -35,14 +37,16 @@ class DfsVis(AlgoController):
     def __init__(self, graph: Graph):
         super().__init__(graph)
 
-    def draw_dfs_vis(self, win: pygame.Surface):
+    def draw_dfs_vis(self, win: pygame.Surface, start: int):
         print(self.graph.current_adj_list)
         for v in self.graph.current_adj_list.keys():
             self.visited[v] = False
 
-        self.dfs(1)
+        self.dfs(start)
 
         for v, order in self.vis_queue:
+            if v == start:
+                continue
             if order == 'in':
                 self.graph.vertex_dict[v].color = Colors.YELLOW
             elif order == 'out':
@@ -65,16 +69,18 @@ class BfsVis(AlgoController):
         super().__init__(graph)
         self.dist = defaultdict()
 
-    def draw_bfs_vis(self, win: pygame.Surface):
+    def draw_bfs_vis(self, win: pygame.Surface, start: int):
         for v in self.graph.current_adj_list.keys():
             self.visited[v] = False
             self.dist[v] = -1
 
-        self.bfs(1)
+        self.bfs(start)
         color = (0, 255, 0)
         color_change = 70
         current_p = 0
         for v, phase in self.vis_queue:
+            if v == start:
+                continue
             if phase != current_p:
                 current_p = phase
                 color = (0, color[1] - color_change, 0)
@@ -213,28 +219,55 @@ class DijkstraVis(AlgoController):
     def __init__(self, graph: Graph):
         super().__init__(graph)
         self.dist = defaultdict()
+        self.predecessors = defaultdict()
         self.weighted_graph = defaultdict(list)
 
-    def draw_dijkstra_vis(self, win: pygame.Surface):
+    def draw_dijkstra_vis(self, win: pygame.Surface, start: int, end: int):
         for v in self.graph.current_adj_list.keys():
             self.visited[v] = False
             self.dist[v] = INFINITY
+            self.predecessors[v] = 0
         self.make_weighted_graph_rep()
 
-        self.dijkstra(1)
+        is_path = self.dijkstra(start, end)
 
         for v in self.vis_queue:
+            if v == start or v == end:
+                continue
             self.graph.vertex_dict[v].color = Colors.YELLOW
             self.redraw_window(win)
+
+        if is_path:
+            path = self.construct_path(end)
+            pre = start
+            for v in path:
+                self.graph.vertex_dict[v].color = Colors.BLUE
+                e = self.graph.find_edge(pre, v)
+                if e:
+                    e.color = Colors.BLUE
+                pre = v
+                self.redraw_window(win)
+            e = self.graph.find_edge(pre, end)
+            if e:
+                e.color = Colors.BLUE
+            self.redraw_window(win)
+        else:
+            win.fill(Colors.GREY)
+            Button("NO PATH", 35, (320, 35, 350, 40), Colors.GREY, Colors.GREY).draw(win)
+            self.graph.draw(win)
+            pygame.display.update()
+            pygame.time.wait(500)
         self.clear_after_vis()
 
-    def dijkstra(self, start: int):
+    def dijkstra(self, start: int, end: int) -> bool:
         pq = PriorityQueue()
         pq.put((0, start))
         self.dist[start] = 0
 
         while not pq.empty():
             v = pq.get()[1]
+            if v == end:
+                return True
             if self.visited[v]:
                 continue
             self.visited[v] = True
@@ -243,7 +276,19 @@ class DijkstraVis(AlgoController):
                 u, w = p
                 if self.dist[v] + w < self.dist[u]:
                     self.dist[u] = self.dist[v] + w
+                    self.predecessors[u] = v
                     pq.put((-w, u))
+        return False
+
+    def construct_path(self, end: int) -> List[int]:
+        path = []
+        x = end
+        while self.predecessors[x] != 0:
+            path.append(self.predecessors[x])
+            x = self.predecessors[x]
+        path.pop()
+        path.reverse()
+        return path
 
     def make_weighted_graph_rep(self):
         for e in self.graph.edge_arr:

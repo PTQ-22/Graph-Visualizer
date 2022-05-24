@@ -87,11 +87,13 @@ def main():
 
                 if len(graph.vertex_dict) > 0:
                     if clicked_button.text == "DFS":
+                        start_node = buttons_bar.draw_node_choosing(win, clock, graph, "CHOOSE START NODE", Colors.PINK)
                         dfs = DfsVis(graph)
-                        dfs.draw_dfs_vis(win)
+                        dfs.draw_dfs_vis(win, start_node)
                     if clicked_button.text == "BFS":
+                        start_node = buttons_bar.draw_node_choosing(win, clock, graph, "CHOOSE START NODE", Colors.PINK)
                         bfs = BfsVis(graph)
-                        bfs.draw_bfs_vis(win)
+                        bfs.draw_bfs_vis(win, start_node)
                     if clicked_button.text == "SCC":
                         scc = SCCvis(graph)
                         scc.draw_scc_vis(win)
@@ -105,7 +107,9 @@ def main():
                         artic_points = BridesAndArticPointsVis(graph)
                         artic_points.draw_artic_points_vis(win)
                     if clicked_button.text == "DIJKSTRA":
+                        start_node = buttons_bar.draw_node_choosing(win, clock, graph, "CHOOSE START NODE", Colors.PINK)
+                        end_node = buttons_bar.draw_node_choosing(win, clock, graph, "CHOOSE END NODE", Colors.GREEN)
                         dijkstra = DijkstraVis(graph)
-                        dijkstra.draw_dijkstra_vis(win)
+                        dijkstra.draw_dijkstra_vis(win, start_node, end_node)
 
         pygame.display.update()
