@@ -1,5 +1,5 @@
 import random
-from queue import PriorityQueue
+import heapq
 from collections import defaultdict, deque
 from typing import List
 
@@ -260,12 +260,12 @@ class DijkstraVis(AlgoController):
         self.clear_after_vis()
 
     def dijkstra(self, start: int, end: int) -> bool:
-        pq = PriorityQueue()
-        pq.put((0, start))
+
+        pq = [(0, start)]
         self.dist[start] = 0
 
-        while not pq.empty():
-            v = pq.get()[1]
+        while len(pq) > 0:
+            v = heapq.heappop(pq)[1]
             if v == end:
                 return True
             if self.visited[v]:
@@ -277,7 +277,7 @@ class DijkstraVis(AlgoController):
                 if self.dist[v] + w < self.dist[u]:
                     self.dist[u] = self.dist[v] + w
                     self.predecessors[u] = v
-                    pq.put((-w, u))
+                    heapq.heappush(pq, (w, u))
         return False
 
     def construct_path(self, end: int) -> List[int]:

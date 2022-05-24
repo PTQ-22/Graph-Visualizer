@@ -151,7 +151,7 @@ class Graph:
 
     def hover_nodes_on_mouse(self, mouse_pos: Tuple[int, int]):
         for v in self.vertex_dict.values():
-            if v.rect.collidepoint(mouse_pos) and v.color == Colors.GREY:
+            if v.rect.collidepoint(mouse_pos) and (v.color == Colors.GREY or v.color == Colors.DARK_GREY):
                 v.color = Colors.DARK_GREY
             elif v.color == Colors.DARK_GREY:
                 v.color = Colors.GREY
