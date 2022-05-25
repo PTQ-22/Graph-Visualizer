@@ -313,6 +313,7 @@ class BridesAndArticPointsVis(AlgoController):
             self.pre[v] = 0
             self.low[v] = 0
             self.is_art_point[v] = False
+            self.visited[v] = False
         self.pre_counter = 0
 
     def draw_bridges_vis(self, win: pygame.Surface):
@@ -330,6 +331,7 @@ class BridesAndArticPointsVis(AlgoController):
 
     def draw_artic_points_vis(self, win: pygame.Surface):
         self.dfs(1, -1)
+        self.root_dfs(1, -1)
 
         for v in self.graph.vertex_dict.values():
             if self.is_art_point[v.number]:
@@ -343,15 +345,20 @@ class BridesAndArticPointsVis(AlgoController):
             return self.pre[v]
         self.pre_counter += 1
         self.pre[v] = self.low[v] = self.pre_counter
-        c = 0
         for u in self.graph.adj_list_undirected[v]:
             if u != pred:
-                c += 1
                 self.low[v] = min(self.low[v], self.dfs(u, v))
                 if pred != -1 and self.low[u] >= self.pre[v]:
                     self.is_art_point[v] = True
 
-        if pred == -1 and c > 1:
-            self.is_art_point[v] = True
-
         return self.low[v]
+
+    def root_dfs(self, v: int, pre: int):
+        self.visited[v] = True
+        c = 0
+        for u in self.graph.adj_list_directed[v]:
+            if not self.visited[u]:
+                c += 1
+                self.root_dfs(u, v)
+        if pre == -1 and c > 1:
+            self.is_art_point[v] = True
